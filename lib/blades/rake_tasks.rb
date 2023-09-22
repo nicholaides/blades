@@ -1,5 +1,8 @@
 require "rake/tasklib"
+require "rake/clean"
+
 require_relative "../blades"
+CLEAN.include "coverage"
 
 module Blades
   class RakeTasks < Rake::TaskLib
@@ -9,8 +12,6 @@ module Blades
       after: proc {}
     )
       super()
-
-      task default: namespace_name
 
       task namespace_name => "#{namespace_name}:build"
 
@@ -31,6 +32,7 @@ module Blades
           end
         end
 
+        CLEAN.include(*templates.map(&:dst))
         task :clean do
           templates.each(&:clean)
         end
