@@ -1,6 +1,7 @@
 require_relative "blades/version"
 
 require "fileutils"
+require "pathname"
 
 module Blades
   def self.sh_to_pipe(*cmd)
@@ -16,10 +17,16 @@ module Blades
 
   def self.find_all = Dir["**/*.tmpl.*"].map { Template.new(_1) }
 
-  Template = Struct.new(:src) do
+  class Template
+    attr_accessor :src
+
+    def initialize(src)
+      @src = Pathname(src)
+    end
+
     def dst = src.sub(/\.tmpl..+$/, "")
 
-    def ext?(str) = dst.end_with?(str)
+    def ext?(str) = dst.extname == str
 
     def executable? = File.executable?(src)
 
