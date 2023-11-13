@@ -37,13 +37,10 @@ module Blades
     end
 
     def dependencies
-      return unless executable?
-
-      deps = File.readlines(src).flat_map do
-        _1.split(/\bblades?:dependency\s+/)[1]&.chomp&.split || []
-      end
-
-      deps.map { src.parent + _1 }
+      File
+        .readlines(src)
+        .flat_map { _1.split(/\bblades?:dependency\s+/)[1]&.chomp&.split || [] }
+        .map { src.parent + _1 }
     end
   end
 end
