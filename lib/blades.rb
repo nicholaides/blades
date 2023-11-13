@@ -35,5 +35,15 @@ module Blades
     def clean
       FileUtils.rm(dst) if File.exist?(dst)
     end
+
+    def dependencies
+      return unless executable?
+
+      deps = File.readlines(src).flat_map do
+        _1.split(/\bblades?:dependency\s+/)[1]&.chomp&.split || []
+      end
+
+      deps.map { src.parent + _1 }
+    end
   end
 end

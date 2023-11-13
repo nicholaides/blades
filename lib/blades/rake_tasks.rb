@@ -20,13 +20,11 @@ module Blades
         templates = Blades.find_all
 
         task build: templates.map(&:dst) do
-          if @generated_templates&.any?
-            after_all.call(@generated_templates)
-          end
+          after_all.call(@generated_templates) if @generated_templates&.any?
         end
 
         templates.each do |template|
-          file template.dst => template.src do
+          file template.dst => [template.src, *template.dependencies] do
             if template.executable?
               before.call template
               template.compile_to_dst
