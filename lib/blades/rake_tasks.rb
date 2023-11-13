@@ -9,7 +9,8 @@ module Blades
     def initialize(
       namespace_name: :blades,
       before: proc {},
-      after: proc {}
+      after: proc {},
+      after_all: proc {}
     )
       super()
 
@@ -18,7 +19,11 @@ module Blades
       namespace namespace_name do
         templates = Blades.find_all
 
-        task build: templates.map(&:dst)
+        task build: templates.map(&:dst) do
+          if @generated_templates&.any?
+            after_all.call(@generated_templates)
+          end
+        end
 
         templates.each do |template|
           file template.dst => template.src do
@@ -26,6 +31,7 @@ module Blades
               before.call template
               template.compile_to_dst
               after.call template
+              (@generated_templates ||= []) << template
             else
               warn "Skip compiling #{template.dst} because #{template.src} is not executable"
             end
