@@ -34,7 +34,7 @@ module Blades
       possible_names = descend_exts(append_ext(base, ".X")).map { _1.sub_ext(ext) }
 
       possible_names.detect { File.exist?(_1) } || raise(
-        "Couldn't find related #{ext.inspect} file to #{base.inspect}. Tried: #{possible_names.map { "- #{_1}" }}"
+        "Couldn't find related #{ext.inspect} file to #{base.inspect}. Tried: #{possible_names.map { "\n- #{_1}" }}"
       )
     end
 
