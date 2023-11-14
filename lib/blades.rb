@@ -24,7 +24,9 @@ module Blades
       Pathname.new(caller_locations.drop_while { _1.path == __FILE__ }.first.path)
     end
 
-    def relative_file(path) = __caller_path__.parent + path
+    def relative_file(path) = relative_file_to(__caller_path__, path)
+
+    def relative_file_to(base, path) = base.parent + path
 
     def related_file(ext) = related_file_to(__caller_path__, ext)
 
@@ -73,11 +75,20 @@ module Blades
       FileUtils.rm(dst) if File.exist?(dst)
     end
 
+    # handles:
+    #   blades:dependency .yaml => finds related .yaml file
+    #   blades:dependency ./something.yml => finds relative file ./something.yml
     def dependencies
       File
         .readlines(src)
-        .flat_map { _1.split(/\bblades?:dependency\s+/)[1]&.chomp&.split || [] }
-        .map { src.parent + _1 }
+        .flat_map { _1.split(/\bblades:dependency\s+/)[1]&.chomp&.split || [] }
+        .map do
+          if _1.start_with?(".") && !_1.include?("/")
+            Rel.related_file_to(src, _1)
+          else
+            Rel.relative_file_to(src, _1)
+          end
+        end
     end
   end
 end
